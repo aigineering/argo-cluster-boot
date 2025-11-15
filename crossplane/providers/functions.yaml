@@ -1,0 +1,42 @@
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-patch-and-transform
+  annotations:
+    argocd.argoproj.io/sync-wave: "-37"
+spec:
+  package: xpkg.upbound.io/upbound/function-patch-and-transform:v0.9.1
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-go-templating
+  annotations:
+    argocd.argoproj.io/sync-wave: "-37"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.11.0
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-auto-ready
+  annotations:
+    argocd.argoproj.io/sync-wave: "-37"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:v0.5.1
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-go-templating
+  annotations:
+    argocd.argoproj.io/sync-wave: "-37"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.11.0
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: crossplane-contrib-function-kcl
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:v0.11.6

@@ -1,0 +1,87 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-providers
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-989"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aigineering/argo-cluster-boot
+    targetRevision: main
+    path: infrasctructure/crossplane/providers
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-configs
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-988"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aigineering/argo-cluster-boot
+    targetRevision: main
+    path: crossplane/configs
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+# argocd/bootstrap-infra.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-xrd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-987"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aigineering/argo-cluster-boot
+    targetRevision: main
+    path: crossplane/xrd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-compositions
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-996"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aigineering/argo-cluster-boot
+    targetRevision: main
+    path: crossplane/compositions
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
