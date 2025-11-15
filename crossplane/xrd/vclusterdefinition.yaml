@@ -1,0 +1,157 @@
+# xrd/vclusterdefinition.yaml
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: vclusters.infra.pro-techt.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-37"
+spec:
+  group: infra.pro-techt.io
+  names:
+    kind: VCluster
+    plural: vclusters
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  required:
+                    - clusterName
+                  properties:
+                    clusterName:
+                      type: string
+                      description: "Name of the vcluster"
+                    namespace:
+                      type: string
+                      description: "Namespace where the vcluster will be deployed"
+                      default: "vcluster"
+                    vclusterVersion:
+                      type: string
+                      description: "Version of vcluster to deploy"
+                      default: "0.19.5"
+                    kubernetes:
+                      type: object
+                      description: "Kubernetes configuration for the vcluster"
+                      properties:
+                        version:
+                          type: string
+                          description: "Kubernetes version for the vcluster"
+                          default: "1.33"
+                      default:
+                        version: "1.33"
+                    resources:
+                      type: object
+                      description: "Resource limits and requests for vcluster components"
+                      properties:
+                        syncer:
+                          type: object
+                          properties:
+                            requests:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                  default: "100m"
+                                memory:
+                                  type: string
+                                  default: "128Mi"
+                            limits:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                  default: "500m"
+                                memory:
+                                  type: string
+                                  default: "512Mi"
+                        controlPlane:
+                          type: object
+                          properties:
+                            requests:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                  default: "200m"
+                                memory:
+                                  type: string
+                                  default: "256Mi"
+                            limits:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                  default: "1000m"
+                                memory:
+                                  type: string
+                                  default: "1Gi"
+                      default:
+                        syncer:
+                          requests:
+                            cpu: "100m"
+                            memory: "128Mi"
+                          limits:
+                            cpu: "500m"
+                            memory: "512Mi"
+                        controlPlane:
+                          requests:
+                            cpu: "200m"
+                            memory: "256Mi"
+                          limits:
+                            cpu: "1000m"
+                            memory: "1Gi"
+                    expose:
+                      type: object
+                      description: "Service exposure configuration for accessing the vcluster"
+                      properties:
+                        type:
+                          type: string
+                          enum: ["LoadBalancer", "NodePort", "ClusterIP"]
+                          default: "LoadBalancer"
+                        annotations:
+                          type: object
+                          additionalProperties:
+                            type: string
+                          default: {}
+                      default:
+                        type: "LoadBalancer"
+                        annotations: {}
+                    argocd:
+                      type: object
+                      description: "ArgoCD integration configuration"
+                      properties:
+                        enabled:
+                          type: boolean
+                          description: "Whether to create ArgoCD cluster secret"
+                          default: true
+                        project:
+                          type: string
+                          description: "ArgoCD project for this cluster"
+                          default: "default"
+                        labels:
+                          type: object
+                          description: "Labels to apply to the ArgoCD cluster secret"
+                          additionalProperties:
+                            type: string
+                      default:
+                        enabled: true
+                        project: "default"
+                        labels: {}
+
+            status:
+              type: object
+              properties:
+                endpoint:
+                  type: string
+                  description: "The endpoint URL of the vcluster API server"
+                ready:
+                  type: boolean
+                  description: "Whether the vcluster is ready"
