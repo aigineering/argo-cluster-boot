@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra-discovery
+  name: argocd-install
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-98"
+    argocd.argoproj.io/sync-wave: "-900"
 spec:
   destination:
     namespace: argocd
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: boostrap/_discovery
+    path: bootstrap/argocd
     repoURL: https://github.com/aigineering/argo-cluster-boot
     targetRevision: main
   syncPolicy:
