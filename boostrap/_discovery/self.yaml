@@ -11,7 +11,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: boostrap/argocd
+    path: boostrap/_discovery
     repoURL: https://github.com/aigineering/argo-cluster-boot
     targetRevision: main
   syncPolicy:
