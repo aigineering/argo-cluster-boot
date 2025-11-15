@@ -1,7 +1,8 @@
 import argo_cd.v1alpha1
 import crossplane_provider_kubernetes.v1alpha2
+import .vcluster_config as vc
 
-v1alpha1.Application {
+_Application = v1alpha1.Application {
     metadata: {
         name: "vcluster"
         namespace: "argocd"
@@ -23,6 +24,14 @@ v1alpha1.Application {
                 prune: False
                 selfHeal: True
             }
+        }
+    }
+}
+
+CC = vc.ClusterConfig {
+    exportKubeConfig: {
+        secret: {
+            name: "test"
         }
     }
 }

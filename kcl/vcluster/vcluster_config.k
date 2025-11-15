@@ -1,81 +1,37 @@
-"""
-VCluster Configuration Schema
-This schema mirrors the Go structs defined in config.example.go
-"""
-
-# Main Config Schema
-schema Config:
-    """
-    Config is the vCluster config. This struct describes valid Helm values 
-    for vCluster as well as configuration used by the vCluster binary itself.
-    """
-    # Global values shared across all (sub)charts
+schema ClusterConfig:
     global?: any
-    # ExportKubeConfig describes how vCluster should export the vCluster kubeConfig file.
     exportKubeConfig?: ExportKubeConfig
-    # Sync describes how to sync resources from the virtual cluster to host cluster and back.
     sync?: Sync
-    # Integrations holds config for vCluster integrations with other operators or tools running on the host cluster
     integrations?: Integrations
-    # Deploy holds configuration for the deployment of vCluster.
     deploy?: Deploy
-    # Networking options related to the virtual cluster.
     networking?: Networking
-    # Policies to enforce for the virtual cluster deployment as well as within the virtual cluster.
     policies?: Policies
-    # Configure vCluster's control plane components and deployment.
     controlPlane?: ControlPlane
-    # PrivateNodes holds configuration for vCluster private nodes mode.
     privateNodes?: PrivateNodes
-    # RBAC options for the virtual cluster.
     rbac?: RBAC
-    # Define which vCluster plugins to load.
     plugins?: {str:Plugins}
-    # Experimental features for vCluster. Configuration here might change, so be careful with this.
     experimental?: Experimental
-    # External holds configuration for tools that are external to the vCluster.
     external?: {str:ExternalConfig}
-    # Configuration related to telemetry gathered about vCluster usage.
     telemetry?: Telemetry
-    # ServiceCIDR holds the service cidr for the virtual cluster. Do not use this option anymore.
     serviceCIDR?: str
-    # Specifies whether to use vCluster Pro. This is automatically inferred in newer versions. Do not use that option anymore.
     pro?: bool
-    # Plugin specifies which vCluster plugins to enable. Use "plugins" instead. Do not use this option anymore.
     plugin?: {str:Plugin}
-    # SleepMode holds the native sleep mode configuration for Pro clusters
     sleepMode?: SleepMode
-    # Logging provides structured logging options
     logging?: Logging
 
-# Export KubeConfig
 schema ExportKubeConfig:
     """ExportKubeConfig describes how vCluster should export the vCluster kubeconfig."""
-    # Context is the name of the context within the generated kubeconfig to use.
     context?: str
-    # Override the default https://localhost:8443 and specify a custom hostname for the generated kubeconfig.
     server?: str
-    # If tls should get skipped for the server
     insecure?: bool
-    # ServiceAccount can be used to generate a service account token instead of the default certificates.
     serviceAccount?: ExportKubeConfigServiceAccount
-    # Declare in which host cluster secret vCluster should store the generated virtual cluster kubeconfig.
-    # If this is not defined, vCluster will create it with `vc-NAME`. If you specify another name,
-    # vCluster creates the config in this other secret.
-    # Deprecated: Use AdditionalSecrets instead.
     secret?: ExportKubeConfigSecretReference
-    # AdditionalSecrets specifies the additional host cluster secrets in which vCluster will store the
-    # generated virtual cluster kubeconfigs.
     additionalSecrets?: [ExportKubeConfigAdditionalSecretReference]
 
 schema ExportKubeConfigServiceAccount:
     """ServiceAccount configuration for kubeconfig generation"""
-    # Name of the service account to be used to generate a service account token instead of the default certificates.
     name?: str
-    # Namespace of the service account to be used to generate a service account token instead of the default certificates.
-    # If omitted, will use the kube-system namespace.
     namespace?: str
-    # ClusterRole to assign to the service account.
     clusterRole?: str
 
 schema ExportKubeConfigSecretReference:
@@ -84,10 +40,7 @@ schema ExportKubeConfigSecretReference:
     If this is not defined, vCluster create it with `vc-NAME`. If you specify another name,
     vCluster creates the config in this other secret.
     """
-    # Name is the name of the secret where the kubeconfig should get stored.
     name?: str
-    # Namespace where vCluster should store the kubeconfig secret. If this is not equal to the namespace
-    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
     namespace?: str
 
 schema ExportKubeConfigAdditionalSecretReference:
@@ -95,21 +48,13 @@ schema ExportKubeConfigAdditionalSecretReference:
     ExportKubeConfigAdditionalSecretReference defines the additional host cluster secret in which
     vCluster stores the generated virtual cluster kubeconfigs.
     """
-    # Context is the name of the context within the generated kubeconfig to use.
     context?: str
-    # Override the default https://localhost:8443 and specify a custom hostname for the generated kubeconfig.
     server?: str
-    # If tls should get skipped for the server
     insecure?: bool
-    # ServiceAccount can be used to generate a service account token instead of the default certificates.
     serviceAccount?: ExportKubeConfigServiceAccount
-    # Name is the name of the secret where the kubeconfig is stored.
     name?: str
-    # Namespace where vCluster stores the kubeconfig secret. If this is not equal to the namespace
-    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
     namespace?: str
 
-# Sync Configuration
 schema Sync:
     toHost?: SyncToHost
     fromHost?: SyncFromHost
@@ -190,13 +135,11 @@ schema SyncNodeSelector:
 
 schema SyncToHostCustomResource:
     enabled: bool
-    # "Namespaced" or "Cluster"
     scope?: str
     patches?: [TranslatePatch]
 
 schema SyncFromHostCustomResource:
     enabled: bool
-    # "Namespaced" or "Cluster"
     scope: str
     patches?: [TranslatePatch]
     mappings?: FromHostMappings
@@ -230,12 +173,10 @@ schema TranslatePatchReference:
     namePath?: str
     namespacePath?: str
 
-# Enable Switches
 schema EnableSwitch:
     enabled?: bool
 
 schema EnableAutoSwitch:
-    # "auto", true, or false
     enabled?: str | bool
 
 schema EnableSwitchWithPatches:
@@ -243,7 +184,6 @@ schema EnableSwitchWithPatches:
     patches?: [TranslatePatch]
 
 schema EnableAutoSwitchWithPatches:
-    # "auto", true, or false
     enabled?: str | bool
     patches?: [TranslatePatch]
 
@@ -253,7 +193,6 @@ schema EnableSwitchWithPatchesAndSelector:
     selector?: StandardLabelSelector
 
 schema EnableAutoSwitchWithPatchesAndSelector:
-    # "auto", true, or false
     enabled?: str | bool
     patches?: [TranslatePatch]
     selector?: StandardLabelSelector
@@ -267,7 +206,6 @@ schema StandardLabelSelector:
     matchLabels?: {str:str}
     matchExpressions?: [any]
 
-# Integrations
 schema Integrations:
     metricsServer?: MetricsServer
     kubeVirt?: KubeVirt
@@ -362,7 +300,6 @@ schema IstioSyncToHost:
     gateways?: EnableSwitch
     virtualServices?: EnableSwitch
 
-# Deploy Configuration
 schema Deploy:
     kubeProxy?: KubeProxy
     metallb?: Metallb
@@ -418,7 +355,6 @@ schema DeployMetricsServer:
 schema VolumeSnapshotController:
     enabled?: bool
 
-# Networking
 schema Networking:
     serviceCIDR?: str
     podCIDR?: str
@@ -456,7 +392,6 @@ schema NetworkProxyKubelets:
     byHostname?: bool
     byIP?: bool
 
-# Policies
 schema Policies:
     networkPolicy?: NetworkPolicy
     podSecurityStandard?: str
@@ -487,7 +422,6 @@ schema NetworkPolicyWorkloadPublicEgress:
     except?: [str]
 
 schema ResourceQuota:
-    # "auto", true, or false
     enabled?: str | bool
     quota?: {str:any}
     scopeSelector?: {str:any}
@@ -496,7 +430,6 @@ schema ResourceQuota:
     labels?: {str:str}
 
 schema LimitRange:
-    # "auto", true, or false
     enabled?: str | bool
     default?: {str:any}
     defaultRequest?: {str:any}
@@ -564,7 +497,6 @@ schema ObjectMeta:
     labels?: {str:str}
     annotations?: {str:str}
 
-# Control Plane
 schema ControlPlane:
     endpoint?: str
     distro?: Distro
@@ -850,7 +782,6 @@ schema ControlPlanePersistence:
     addVolumeMounts?: [VolumeMount]
 
 schema VolumeClaim:
-    # "auto", true, or false
     enabled?: str | bool
     accessModes?: [str]
     retentionPolicy?: str
@@ -942,7 +873,6 @@ schema ServiceMonitor:
     labels?: {str:str}
     annotations?: {str:str}
 
-# Private Nodes
 schema PrivateNodes:
     enabled?: bool
     kubelet?: Kubelet
@@ -1067,7 +997,6 @@ schema PrivateNodesVPN:
 schema PrivateNodesVPNNodeToNode:
     enabled?: bool
 
-# RBAC
 schema RBAC:
     role?: RBACRole
     clusterRole?: RBACClusterRole
@@ -1079,12 +1008,10 @@ schema RBACRole:
     overwriteRules?: [any]
 
 schema RBACClusterRole:
-    # "auto", true, or false
     enabled?: str | bool
     extraRules?: [any]
     overwriteRules?: [any]
 
-# Plugins
 schema Plugin:
     name?: str
     image?: str
@@ -1132,7 +1059,6 @@ schema RBACPolicyRule:
     resourceNames?: [str]
     nonResourceURLs?: [str]
 
-# Experimental
 schema Experimental:
     deploy?: ExperimentalDeploy
     syncSettings?: ExperimentalSyncSettings
@@ -1196,11 +1122,9 @@ schema RuleWithVerbs:
     scope?: str
     operations?: [str]
 
-# External Config
 schema ExternalConfig:
     [str]: any
 
-# Telemetry
 schema Telemetry:
     enabled?: bool
     instanceCreator?: str
@@ -1208,7 +1132,6 @@ schema Telemetry:
     platformUserID?: str
     platformInstanceID?: str
 
-# Sleep Mode
 schema SleepMode:
     enabled?: bool
     timeZone?: str
@@ -1226,11 +1149,9 @@ schema AutoWakeup:
 schema AutoSleepExclusion:
     selector?: LabelSelector
 
-# Logging
 schema Logging:
     encoding?: str
 
-# Common Schemas
 schema Image:
     registry?: str
     repository?: str
