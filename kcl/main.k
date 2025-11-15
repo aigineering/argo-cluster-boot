@@ -12,15 +12,20 @@ _config = vcluster.VCluster {
     spec: {
         parameters: {
             clusterName: "test-cluster"
+            exportConfig: {
+                name: "tests-secret"
+                namespace: "somens"
+            }
         }
     }
 }
-_spec = _config.spec
+_spec = _config.spec.parameters
 
 _CC = vc.ClusterConfig {
     exportKubeConfig: {
         secret: {
-            name: "testss"
+            name: _spec.exportConfig.name
+            namespace: _spec.exportConfig.namespace
         }
     }
 }
@@ -34,7 +39,7 @@ v1alpha1.Application {
         source: {
             repoURL: "https://charts.loft.sh"
             chart: "vcluster"
-            targetRevision: _spec.parameters.vclusterHelmVersion
+            targetRevision: _spec.vclusterHelmVersion
             helm: {
                 values: yaml.encode(_CC)
             }

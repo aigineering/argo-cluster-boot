@@ -10,137 +10,84 @@ spec:
     apiVersion: infra.pro-techt.io/v1alpha1
     kind: VCluster
 
-  resources:
-    # Step 1: Create namespace for vcluster
-    - name: vcluster-namespace
-      base:
-        apiVersion: kubernetes.crossplane.io/v1alpha2
-        kind: Object
-        spec:
-          forProvider:
-            manifest:
-              apiVersion: v1
-              kind: Namespace
-              metadata:
-                name: vcluster
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.namespace
-          toFieldPath: spec.forProvider.manifest.metadata.name
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.namespace
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: "%s-namespace"
+  mode: Pipeline
 
-    # Step 2: Install vcluster via Helm using provider-helm
-    - name: vcluster-helm-release
-      base:
-        apiVersion: helm.crossplane.io/v1beta1
-        kind: Release
+  pipeline:
+    - step: render-vcluster-resources
+      functionRef:
+        name: crossplane-contrib-function-kcl
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLRun
+        metadata:
+          name: basic
         spec:
-          rollbackLimit: 3
-          forProvider:
-            namespace: vcluster
-            chart:
-              name: vcluster
-              repository: https://charts.loft.sh
-              version: "0.19.5"
-            values:
-              sync:
-                toHost:
-                  pods:
-                    enabled: true
-                  secrets:
-                    enabled: true
-                  configMaps:
-                    enabled: true
-                  services:
-                    enabled: true
-              syncer:
-                resources:
-                  requests:
-                    cpu: "100m"
-                    memory: "128Mi"
-                  limits:
-                    cpu: "500m"
-                    memory: "512Mi"
-              controlPlane:
-                distro:
-                  k8s:
-                    enabled: true
-                    version: "1.33"
-                statefulSet:
-                  resources:
-                    requests:
-                      cpu: "200m"
-                      memory: "256Mi"
-                    limits:
-                      cpu: "1000m"
-                      memory: "1Gi"
-              service:
-                type: LoadBalancer
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.namespace
-          toFieldPath: spec.forProvider.namespace
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.clusterName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: "%s-helm"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.clusterName
-          toFieldPath: spec.forProvider.chart.name
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.vclusterVersion
-          toFieldPath: spec.forProvider.chart.version
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.syncer.requests.cpu
-          toFieldPath: spec.forProvider.values.syncer.resources.requests.cpu
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.syncer.requests.memory
-          toFieldPath: spec.forProvider.values.syncer.resources.requests.memory
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.syncer.limits.cpu
-          toFieldPath: spec.forProvider.values.syncer.resources.limits.cpu
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.syncer.limits.memory
-          toFieldPath: spec.forProvider.values.syncer.resources.limits.memory
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.controlPlane.requests.cpu
-          toFieldPath: spec.forProvider.values.controlPlane.statefulSet.resources.requests.cpu
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.controlPlane.requests.memory
-          toFieldPath: spec.forProvider.values.controlPlane.statefulSet.resources.requests.memory
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.controlPlane.limits.cpu
-          toFieldPath: spec.forProvider.values.controlPlane.statefulSet.resources.limits.cpu
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.resources.controlPlane.limits.memory
-          toFieldPath: spec.forProvider.values.controlPlane.statefulSet.resources.limits.memory
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.kubernetes.version
-          toFieldPath: spec.forProvider.values.controlPlane.distro.k8s.version
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.expose.type
-          toFieldPath: spec.forProvider.values.service.type
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.expose.annotations
-          toFieldPath: spec.forProvider.values.service.annotations
-        - type: ToCompositeFieldPath
-          fromFieldPath: status.atProvider.releaseDescription
-          toFieldPath: status.helmStatus
-        - type: CombineToComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.parameters.clusterName
-              - fromFieldPath: spec.parameters.namespace
-            strategy: string
-            string:
-              fmt: "https://%s.%s.svc"
-          toFieldPath: status.endpoint
+          dependencies:
+            - '{ git = "https://github.com/SimSimY/kcl-vcluster-config", commit = "3af8de0", version = "0.30.0" }'
+            - 'argo-cd = "3.1.8"'
+            - 'crossplane-provider-kubernetes = "0.18.0"'
+          target: Resources
+
+          source: |
+            import argo_cd.v1alpha1
+            import crossplane_provider_kubernetes.v1alpha2
+            import yaml
+            import vcluster_config.models.values as vc
+            import models.v1alpha1.infra_pro_techt_io_v1alpha1_v_cluster as vcluster
+
+            # oxr = option("params").oxr
+            _config = vcluster.VCluster {
+                metadata: {
+                    name: "testss"
+                    namespace: "default"
+                }
+                spec: {
+                    parameters: {
+                        clusterName: "test-cluster"
+                        exportConfig: {
+                            name: "tests-secret"
+                            namespace: "somens"
+                        }
+                    }
+                }
+            }
+            _spec = _config.spec.parameters
+
+            _CC = vc.ClusterConfig {
+                exportKubeConfig: {
+                    secret: {
+                        name: _spec.exportConfig.name
+                        namespace: _spec.exportConfig.namespace
+                    }
+                }
+            }
+            v1alpha1.Application {
+                metadata: {
+                    name: "vcluster-" + _config.metadata.name
+                    namespace: "argocd"
+                }
+                spec: {
+                    project: "default"
+                    source: {
+                        repoURL: "https://charts.loft.sh"
+                        chart: "vcluster"
+                        targetRevision: _spec.vclusterHelmVersion
+                        helm: {
+                            values: yaml.encode(_CC)
+                        }
+                    }
+                    destination: {
+                        server: "https://kubernetes.default.svc"
+                        namespace: "vcluster"
+                    }
+                    syncPolicy: {
+                        automated: {
+                            prune: False
+                            selfHeal: True
+                        }
+                    }
+                }
+            }
+    - step: automatically-detect-ready-composed-resources
+      functionRef:
+        name: function-auto-ready

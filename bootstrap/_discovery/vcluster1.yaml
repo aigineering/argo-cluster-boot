@@ -1,0 +1,10 @@
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  name: test-vcluster1
+spec:
+  parameters:
+    clusterName: test-cluster-1
+    exportConfig:
+      name: test-secret-1
+      namespace: some-namespace
