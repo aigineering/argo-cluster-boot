@@ -23,3 +23,9 @@
     reg = "ghcr.io"
     repo = "kcl-lang/k8s"
     oci_tag = "1.32.4"
+  [dependencies.vcluster_config]
+    name = "vcluster_config"
+    full_name = "vcluster_config_0.30.0"
+    version = "0.30.0"
+    url = "https://github.com/SimSimY/kcl-vcluster-config"
+    commit = "3af8de0"

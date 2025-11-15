@@ -33,10 +33,10 @@ spec:
                       type: string
                       description: "Namespace where the vcluster will be deployed"
                       default: "vcluster"
-                    vclusterVersion:
+                    vclusterHelmVersion:
                       type: string
                       description: "Version of vcluster to deploy"
-                      default: "0.19.5"
+                      default: "0.30.0"
                     kubernetes:
                       type: object
                       description: "Kubernetes configuration for the vcluster"
@@ -145,6 +145,16 @@ spec:
                     #     enabled: true
                     #     project: "default"
                     #     labels: {}
+                    exportConfig:
+                      type: object
+                      description: "Kubeconfig export configuration"
+                      properties:
+                        name:
+                          type: string
+                          description: "Name of the secret to store the kubeconfig"
+                        namespace:
+                          type: string
+                          description: "Namespace of the secret to store the kubeconfig"
 
             status:
               type: object

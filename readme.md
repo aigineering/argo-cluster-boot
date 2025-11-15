@@ -7,8 +7,8 @@ To sping a new cluster:
 ```bash
 kind delete cluster \
  && kind create cluster \
- && k apply -n argocd -f boostrap/argocd/install.yaml \
- && k apply -f boostrap/\_discovery/self.yaml \
+ && k apply -n argocd -f bootstrap/argocd/install.yaml \
+ && k apply -f bootstrap/\_discovery/self.yaml \
  && sleep 30 \
  && echo -n "argo password: \n" && kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"  |  base64 -d
 
