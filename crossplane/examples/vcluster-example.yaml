@@ -1,0 +1,93 @@
+---
+# Example: Create a vcluster with ArgoCD integration
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  name: dev-cluster
+  namespace: default
+spec:
+  parameters:
+    clusterName: dev-cluster
+    namespace: vcluster-dev
+    vclusterVersion: "0.19.5"
+    kubernetes:
+      version: "1.33"
+    resources:
+      syncer:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+      controlPlane:
+        requests:
+          cpu: "200m"
+          memory: "256Mi"
+        limits:
+          cpu: "1000m"
+          memory: "1Gi"
+    expose:
+      type: LoadBalancer
+      annotations: {}
+    argocd:
+      enabled: true
+      project: default
+      labels:
+        environment: dev
+        team: platform
+
+---
+# Example: Create a vcluster without ArgoCD integration
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  name: test-cluster
+  namespace: default
+spec:
+  parameters:
+    clusterName: test-cluster
+    namespace: vcluster-test
+    argocd:
+      enabled: false
+
+---
+# Example: Create a production vcluster with custom resources
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  name: prod-cluster
+  namespace: default
+spec:
+  parameters:
+    clusterName: prod-cluster
+    namespace: vcluster-prod
+    vclusterVersion: "0.19.5"
+    kubernetes:
+      version: "1.33"
+    resources:
+      syncer:
+        requests:
+          cpu: "200m"
+          memory: "256Mi"
+        limits:
+          cpu: "1000m"
+          memory: "1Gi"
+      controlPlane:
+        requests:
+          cpu: "500m"
+          memory: "512Mi"
+        limits:
+          cpu: "2000m"
+          memory: "2Gi"
+    expose:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    argocd:
+      enabled: true
+      project: production
+      labels:
+        environment: production
+        team: platform
+        criticality: high

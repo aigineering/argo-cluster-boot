@@ -1,0 +1,1258 @@
+"""
+VCluster Configuration Schema
+This schema mirrors the Go structs defined in config.example.go
+"""
+
+# Main Config Schema
+schema Config:
+    """
+    Config is the vCluster config. This struct describes valid Helm values 
+    for vCluster as well as configuration used by the vCluster binary itself.
+    """
+    # Global values shared across all (sub)charts
+    global?: any
+    # ExportKubeConfig describes how vCluster should export the vCluster kubeConfig file.
+    exportKubeConfig?: ExportKubeConfig
+    # Sync describes how to sync resources from the virtual cluster to host cluster and back.
+    sync?: Sync
+    # Integrations holds config for vCluster integrations with other operators or tools running on the host cluster
+    integrations?: Integrations
+    # Deploy holds configuration for the deployment of vCluster.
+    deploy?: Deploy
+    # Networking options related to the virtual cluster.
+    networking?: Networking
+    # Policies to enforce for the virtual cluster deployment as well as within the virtual cluster.
+    policies?: Policies
+    # Configure vCluster's control plane components and deployment.
+    controlPlane?: ControlPlane
+    # PrivateNodes holds configuration for vCluster private nodes mode.
+    privateNodes?: PrivateNodes
+    # RBAC options for the virtual cluster.
+    rbac?: RBAC
+    # Define which vCluster plugins to load.
+    plugins?: {str:Plugins}
+    # Experimental features for vCluster. Configuration here might change, so be careful with this.
+    experimental?: Experimental
+    # External holds configuration for tools that are external to the vCluster.
+    external?: {str:ExternalConfig}
+    # Configuration related to telemetry gathered about vCluster usage.
+    telemetry?: Telemetry
+    # ServiceCIDR holds the service cidr for the virtual cluster. Do not use this option anymore.
+    serviceCIDR?: str
+    # Specifies whether to use vCluster Pro. This is automatically inferred in newer versions. Do not use that option anymore.
+    pro?: bool
+    # Plugin specifies which vCluster plugins to enable. Use "plugins" instead. Do not use this option anymore.
+    plugin?: {str:Plugin}
+    # SleepMode holds the native sleep mode configuration for Pro clusters
+    sleepMode?: SleepMode
+    # Logging provides structured logging options
+    logging?: Logging
+
+# Export KubeConfig
+schema ExportKubeConfig:
+    """ExportKubeConfig describes how vCluster should export the vCluster kubeconfig."""
+    # Context is the name of the context within the generated kubeconfig to use.
+    context?: str
+    # Override the default https://localhost:8443 and specify a custom hostname for the generated kubeconfig.
+    server?: str
+    # If tls should get skipped for the server
+    insecure?: bool
+    # ServiceAccount can be used to generate a service account token instead of the default certificates.
+    serviceAccount?: ExportKubeConfigServiceAccount
+    # Declare in which host cluster secret vCluster should store the generated virtual cluster kubeconfig.
+    # If this is not defined, vCluster will create it with `vc-NAME`. If you specify another name,
+    # vCluster creates the config in this other secret.
+    # Deprecated: Use AdditionalSecrets instead.
+    secret?: ExportKubeConfigSecretReference
+    # AdditionalSecrets specifies the additional host cluster secrets in which vCluster will store the
+    # generated virtual cluster kubeconfigs.
+    additionalSecrets?: [ExportKubeConfigAdditionalSecretReference]
+
+schema ExportKubeConfigServiceAccount:
+    """ServiceAccount configuration for kubeconfig generation"""
+    # Name of the service account to be used to generate a service account token instead of the default certificates.
+    name?: str
+    # Namespace of the service account to be used to generate a service account token instead of the default certificates.
+    # If omitted, will use the kube-system namespace.
+    namespace?: str
+    # ClusterRole to assign to the service account.
+    clusterRole?: str
+
+schema ExportKubeConfigSecretReference:
+    """
+    Declare in which host cluster secret vCluster should store the generated virtual cluster kubeconfig.
+    If this is not defined, vCluster create it with `vc-NAME`. If you specify another name,
+    vCluster creates the config in this other secret.
+    """
+    # Name is the name of the secret where the kubeconfig should get stored.
+    name?: str
+    # Namespace where vCluster should store the kubeconfig secret. If this is not equal to the namespace
+    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
+    namespace?: str
+
+schema ExportKubeConfigAdditionalSecretReference:
+    """
+    ExportKubeConfigAdditionalSecretReference defines the additional host cluster secret in which
+    vCluster stores the generated virtual cluster kubeconfigs.
+    """
+    # Context is the name of the context within the generated kubeconfig to use.
+    context?: str
+    # Override the default https://localhost:8443 and specify a custom hostname for the generated kubeconfig.
+    server?: str
+    # If tls should get skipped for the server
+    insecure?: bool
+    # ServiceAccount can be used to generate a service account token instead of the default certificates.
+    serviceAccount?: ExportKubeConfigServiceAccount
+    # Name is the name of the secret where the kubeconfig is stored.
+    name?: str
+    # Namespace where vCluster stores the kubeconfig secret. If this is not equal to the namespace
+    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
+    namespace?: str
+
+# Sync Configuration
+schema Sync:
+    toHost?: SyncToHost
+    fromHost?: SyncFromHost
+
+schema SyncToHost:
+    pods?: SyncPods
+    secrets?: SyncAllResource
+    configMaps?: SyncAllResource
+    ingresses?: EnableSwitchWithPatches
+    services?: EnableSwitchWithPatches
+    endpoints?: EnableSwitchWithPatches
+    endpointSlices?: EnableSwitchWithPatches
+    networkPolicies?: EnableSwitchWithPatches
+    persistentVolumeClaims?: EnableSwitchWithPatches
+    persistentVolumes?: EnableSwitchWithPatches
+    volumeSnapshots?: EnableSwitchWithPatches
+    volumeSnapshotContents?: EnableSwitchWithPatches
+    storageClasses?: EnableSwitchWithPatches
+    serviceAccounts?: EnableSwitchWithPatches
+    podDisruptionBudgets?: EnableSwitchWithPatches
+    priorityClasses?: EnableSwitchWithPatches
+    customResources?: {str:SyncToHostCustomResource}
+    namespaces?: SyncToHostNamespaces
+
+schema SyncFromHost:
+    nodes?: SyncNodes
+    events?: EnableSwitchWithPatches
+    ingressClasses?: EnableSwitchWithPatchesAndSelector
+    runtimeClasses?: EnableSwitchWithPatchesAndSelector
+    priorityClasses?: EnableSwitchWithPatchesAndSelector
+    storageClasses?: EnableAutoSwitchWithPatchesAndSelector
+    csiNodes?: EnableAutoSwitchWithPatches
+    csiDrivers?: EnableAutoSwitchWithPatches
+    csiStorageCapacities?: EnableAutoSwitchWithPatches
+    customResources?: {str:SyncFromHostCustomResource}
+    volumeSnapshotClasses?: EnableSwitchWithPatches
+    configMaps?: EnableSwitchWithResourcesMappings
+    secrets?: EnableSwitchWithResourcesMappings
+
+schema SyncPods:
+    enabled?: bool
+    translateImage?: {str:str}
+    enforceTolerations?: [str]
+    useSecretsForSATokens?: bool
+    runtimeClassName?: str
+    priorityClassName?: str
+    rewriteHosts?: SyncRewriteHosts
+    patches?: [TranslatePatch]
+    hybridScheduling?: HybridScheduling
+
+schema SyncRewriteHosts:
+    enabled?: bool
+    initContainer?: SyncRewriteHostsInitContainer
+
+schema SyncRewriteHostsInitContainer:
+    image?: Image
+    resources?: Resources
+
+schema HybridScheduling:
+    enabled?: bool
+    hostSchedulers?: [str]
+
+schema SyncAllResource:
+    enabled?: bool
+    all?: bool
+    patches?: [TranslatePatch]
+
+schema SyncNodes:
+    enabled?: bool
+    syncBackChanges?: bool
+    clearImageStatus?: bool
+    selector?: SyncNodeSelector
+    patches?: [TranslatePatch]
+
+schema SyncNodeSelector:
+    all?: bool
+    labels?: {str:str}
+
+schema SyncToHostCustomResource:
+    enabled: bool
+    # "Namespaced" or "Cluster"
+    scope?: str
+    patches?: [TranslatePatch]
+
+schema SyncFromHostCustomResource:
+    enabled: bool
+    # "Namespaced" or "Cluster"
+    scope: str
+    patches?: [TranslatePatch]
+    mappings?: FromHostMappings
+
+schema SyncToHostNamespaces:
+    enabled: bool
+    patches?: [TranslatePatch]
+    mappings?: FromHostMappings
+    mappingsOnly?: bool
+    extraLabels?: {str:str}
+
+schema FromHostMappings:
+    byName?: {str:str}
+
+schema TranslatePatch:
+    path: str
+    expression?: str
+    reverseExpression?: str
+    reference?: TranslatePatchReference
+    labels?: TranslatePatchLabels
+
+schema TranslatePatchLabels:
+    """Empty schema for labels patch - placeholder for label transformation logic"""
+    _placeholder?: bool
+
+schema TranslatePatchReference:
+    apiVersion: str
+    apiVersionPath?: str
+    kind: str
+    kindPath?: str
+    namePath?: str
+    namespacePath?: str
+
+# Enable Switches
+schema EnableSwitch:
+    enabled?: bool
+
+schema EnableAutoSwitch:
+    # "auto", true, or false
+    enabled?: str | bool
+
+schema EnableSwitchWithPatches:
+    enabled?: bool
+    patches?: [TranslatePatch]
+
+schema EnableAutoSwitchWithPatches:
+    # "auto", true, or false
+    enabled?: str | bool
+    patches?: [TranslatePatch]
+
+schema EnableSwitchWithPatchesAndSelector:
+    enabled?: bool
+    patches?: [TranslatePatch]
+    selector?: StandardLabelSelector
+
+schema EnableAutoSwitchWithPatchesAndSelector:
+    # "auto", true, or false
+    enabled?: str | bool
+    patches?: [TranslatePatch]
+    selector?: StandardLabelSelector
+
+schema EnableSwitchWithResourcesMappings:
+    enabled?: bool
+    patches?: [TranslatePatch]
+    mappings?: FromHostMappings
+
+schema StandardLabelSelector:
+    matchLabels?: {str:str}
+    matchExpressions?: [any]
+
+# Integrations
+schema Integrations:
+    metricsServer?: MetricsServer
+    kubeVirt?: KubeVirt
+    externalSecrets?: ExternalSecrets
+    certManager?: CertManager
+    istio?: Istio
+    netris?: {str:any}
+
+schema MetricsServer:
+    enabled?: bool
+    apiService?: APIService
+    nodes?: bool
+    pods?: bool
+
+schema APIService:
+    service?: APIServiceService
+
+schema APIServiceService:
+    name?: str
+    namespace?: str
+    port?: int
+
+schema KubeVirt:
+    enabled?: bool
+    apiService?: APIService
+    webhook?: EnableSwitch
+    sync?: KubeVirtSync
+
+schema KubeVirtSync:
+    dataVolumes?: EnableSwitch
+    virtualMachineInstanceMigrations?: EnableSwitch
+    virtualMachineInstances?: EnableSwitch
+    virtualMachines?: EnableSwitch
+    virtualMachineClones?: EnableSwitch
+    virtualMachinePools?: EnableSwitch
+
+schema ExternalSecrets:
+    enabled?: bool
+    version?: str
+    webhook?: EnableSwitch
+    sync?: ExternalSecretsSync
+
+schema ExternalSecretsSync:
+    toHost?: ExternalSecretsSyncToHostConfig
+    fromHost?: ExternalSecretsSyncFromHostConfig
+
+schema ExternalSecretsSyncToHostConfig:
+    externalSecrets?: SelectorConfig
+    stores?: EnableSwitchSelector
+
+schema ExternalSecretsSyncFromHostConfig:
+    clusterStores?: EnableSwitchSelector
+
+schema SelectorConfig:
+    selector?: StandardLabelSelector
+
+schema EnableSwitchSelector:
+    enabled?: bool
+    selector?: StandardLabelSelector
+
+schema CertManager:
+    enabled?: bool
+    sync?: CertManagerSync
+
+schema CertManagerSync:
+    toHost?: CertManagerSyncToHost
+    fromHost?: CertManagerSyncFromHost
+
+schema CertManagerSyncToHost:
+    certificates?: EnableSwitch
+    issuers?: EnableSwitch
+
+schema CertManagerSyncFromHost:
+    clusterIssuers?: ClusterIssuersSyncConfig
+
+schema ClusterIssuersSyncConfig:
+    enabled?: bool
+    selector?: LabelSelector
+
+schema LabelSelector:
+    labels?: {str:str}
+
+schema Istio:
+    enabled?: bool
+    sync?: IstioSync
+
+schema IstioSync:
+    toHost?: IstioSyncToHost
+
+schema IstioSyncToHost:
+    destinationRules?: EnableSwitch
+    gateways?: EnableSwitch
+    virtualServices?: EnableSwitch
+
+# Deploy Configuration
+schema Deploy:
+    kubeProxy?: KubeProxy
+    metallb?: Metallb
+    cni?: CNI
+    localPathProvisioner?: LocalPathProvisioner
+    ingressNginx?: IngressNginx
+    metricsServer?: DeployMetricsServer
+    volumeSnapshotController?: VolumeSnapshotController
+
+schema KubeProxy:
+    enabled?: bool
+    image?: str
+    imagePullPolicy?: str
+    nodeSelector?: {str:str}
+    priorityClassName?: str
+    tolerations?: [any]
+    extraEnv?: [any]
+    extraArgs?: [str]
+    config?: {str:any}
+
+schema Metallb:
+    enabled?: bool
+    controllerImage?: str
+    speakerImage?: str
+    ipAddressPool?: MetallbIPAddressPool
+
+schema MetallbIPAddressPool:
+    addresses?: [str]
+    l2Advertisement?: bool
+
+schema CNI:
+    flannel?: CNIFlannel
+
+schema CNIFlannel:
+    enabled?: bool
+    image?: str
+    initImage?: str
+    imagePullPolicy?: str
+
+schema LocalPathProvisioner:
+    enabled?: bool
+    image?: str
+    imagePullPolicy?: str
+    nodePath?: str
+
+schema IngressNginx:
+    enabled?: bool
+    defaultIngressClass?: bool
+
+schema DeployMetricsServer:
+    enabled?: bool
+
+schema VolumeSnapshotController:
+    enabled?: bool
+
+# Networking
+schema Networking:
+    serviceCIDR?: str
+    podCIDR?: str
+    replicateServices?: ReplicateServices
+    resolveDNS?: [ResolveDNS]
+    advanced?: NetworkingAdvanced
+
+schema ReplicateServices:
+    toHost?: [ServiceMapping]
+    fromHost?: [ServiceMapping]
+
+schema ServiceMapping:
+    from?: str
+    to?: str
+
+schema ResolveDNS:
+    hostname: str
+    service: str
+    namespace: str
+    target?: ResolveDNSTarget
+
+schema ResolveDNSTarget:
+    hostname?: str
+    ip?: str
+    hostService?: str
+    hostNamespace?: str
+    vClusterService?: str
+
+schema NetworkingAdvanced:
+    clusterDomain?: str
+    fallbackHostCluster?: bool
+    proxyKubelets?: NetworkProxyKubelets
+
+schema NetworkProxyKubelets:
+    byHostname?: bool
+    byIP?: bool
+
+# Policies
+schema Policies:
+    networkPolicy?: NetworkPolicy
+    podSecurityStandard?: str
+    resourceQuota?: ResourceQuota
+    limitRange?: LimitRange
+    centralAdmission?: CentralAdmission
+
+schema NetworkPolicy:
+    enabled?: bool
+    annotations?: {str:str}
+    labels?: {str:str}
+    fallbackDns?: str
+    controlPlane?: NetworkPolicyControlPlane
+    workload?: NetworkPolicyWorkload
+
+schema NetworkPolicyControlPlane:
+    ingress?: [any]
+    egress?: [any]
+
+schema NetworkPolicyWorkload:
+    publicEgress?: NetworkPolicyWorkloadPublicEgress
+    ingress?: [any]
+    egress?: [any]
+
+schema NetworkPolicyWorkloadPublicEgress:
+    enabled?: bool
+    cidr?: str
+    except?: [str]
+
+schema ResourceQuota:
+    # "auto", true, or false
+    enabled?: str | bool
+    quota?: {str:any}
+    scopeSelector?: {str:any}
+    scopes?: [str]
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema LimitRange:
+    # "auto", true, or false
+    enabled?: str | bool
+    default?: {str:any}
+    defaultRequest?: {str:any}
+    max?: {str:any}
+    min?: {str:any}
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema CentralAdmission:
+    validatingWebhooks?: [ValidatingWebhookConfiguration]
+    mutatingWebhooks?: [MutatingWebhookConfiguration]
+
+schema ValidatingWebhookConfiguration:
+    kind?: str
+    apiVersion?: str
+    metadata?: ObjectMeta
+    webhooks?: [ValidatingWebhook]
+
+schema MutatingWebhookConfiguration:
+    kind?: str
+    apiVersion?: str
+    metadata?: ObjectMeta
+    webhooks?: [MutatingWebhook]
+
+schema ValidatingWebhook:
+    name: str
+    clientConfig: ValidatingWebhookClientConfig
+    rules?: [any]
+    failurePolicy?: str
+    matchPolicy?: str
+    namespaceSelector?: any
+    objectSelector?: any
+    sideEffects?: str
+    timeoutSeconds?: int
+    admissionReviewVersions: [str]
+    matchConditions?: [any]
+
+schema MutatingWebhook:
+    name: str
+    clientConfig: ValidatingWebhookClientConfig
+    rules?: [any]
+    failurePolicy?: str
+    matchPolicy?: str
+    namespaceSelector?: any
+    objectSelector?: any
+    sideEffects?: str
+    timeoutSeconds?: int
+    admissionReviewVersions: [str]
+    matchConditions?: [any]
+    reinvocationPolicy?: str
+
+schema ValidatingWebhookClientConfig:
+    url?: str
+    service?: ValidatingWebhookServiceReference
+    caBundle?: str
+
+schema ValidatingWebhookServiceReference:
+    namespace: str
+    name: str
+    path?: str
+    port?: int
+
+schema ObjectMeta:
+    name?: str
+    labels?: {str:str}
+    annotations?: {str:str}
+
+# Control Plane
+schema ControlPlane:
+    endpoint?: str
+    distro?: Distro
+    standalone?: Standalone
+    backingStore?: BackingStore
+    coredns?: CoreDNS
+    proxy?: ControlPlaneProxy
+    hostPathMapper?: HostPathMapper
+    ingress?: ControlPlaneIngress
+    service?: ControlPlaneService
+    statefulSet?: ControlPlaneStatefulSet
+    serviceMonitor?: ServiceMonitor
+    advanced?: ControlPlaneAdvanced
+
+schema Distro:
+    k8s?: DistroK8s
+    k3s?: DistroK3s
+
+schema DistroK8s:
+    enabled?: bool
+    version?: str
+    apiServer?: DistroContainerEnabled
+    controllerManager?: DistroContainerEnabled
+    scheduler?: DistroContainerEnabled
+    image?: Image
+    imagePullPolicy?: str
+    env?: [any]
+    resources?: {str:any}
+    securityContext?: {str:any}
+
+schema DistroK3s:
+    enabled?: bool
+    token?: str
+    image?: Image
+    imagePullPolicy?: str
+    env?: [any]
+    resources?: {str:any}
+    securityContext?: {str:any}
+    command?: [str]
+    extraArgs?: [str]
+
+schema DistroContainerEnabled:
+    enabled?: bool
+    command?: [str]
+    extraArgs?: [str]
+
+schema Standalone:
+    enabled?: bool
+    dataDir?: str
+    autoNodes?: StandaloneAutoNodes
+    joinNode?: StandaloneJoinNode
+
+schema StandaloneAutoNodes:
+    provider?: str
+    quantity?: int
+    nodeTypeSelector?: [Requirement]
+
+schema StandaloneJoinNode:
+    enabled?: bool
+    preInstallCommands?: [str]
+    preJoinCommands?: [str]
+    postJoinCommands?: [str]
+    containerd?: ContainerdJoin
+    caCertPath?: str
+    skipPhases?: [str]
+    nodeRegistration?: NodeRegistration
+
+schema BackingStore:
+    etcd?: Etcd
+    database?: Database
+
+schema Etcd:
+    embedded?: EtcdEmbedded
+    deploy?: EtcdDeploy
+    external?: EtcdExternal
+
+schema EtcdEmbedded:
+    enabled?: bool
+    migrateFromDeployedEtcd?: bool
+    snapshotCount?: int
+    extraArgs?: [str]
+
+schema EtcdDeploy:
+    enabled?: bool
+    statefulSet?: EtcdDeployStatefulSet
+    service?: EtcdDeployService
+    headlessService?: EtcdDeployHeadlessService
+
+schema EtcdDeployStatefulSet:
+    enabled?: bool
+    enableServiceLinks?: bool
+    image?: Image
+    imagePullPolicy?: str
+    env?: [any]
+    extraArgs?: [str]
+    resources?: Resources
+    pods?: LabelsAndAnnotations
+    highAvailability?: ExternalEtcdHighAvailability
+    scheduling?: ControlPlaneScheduling
+    security?: ControlPlaneSecurity
+    persistence?: ExternalEtcdPersistence
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema EtcdDeployService:
+    enabled?: bool
+    annotations?: {str:str}
+
+schema EtcdDeployHeadlessService:
+    annotations?: {str:str}
+
+schema ExternalEtcdHighAvailability:
+    replicas?: int
+
+schema ExternalEtcdPersistence:
+    volumeClaim?: ExternalEtcdPersistenceVolumeClaim
+    volumeClaimTemplates?: [any]
+    addVolumes?: [any]
+    addVolumeMounts?: [VolumeMount]
+
+schema ExternalEtcdPersistenceVolumeClaim:
+    enabled?: bool
+    accessModes?: [str]
+    retentionPolicy?: str
+    size?: str
+    storageClass?: str
+
+schema EtcdExternal:
+    enabled?: bool
+    endpoint?: str
+    tls?: EtcdExternalTLS
+
+schema EtcdExternalTLS:
+    caFile?: str
+    certFile?: str
+    keyFile?: str
+
+schema Database:
+    embedded?: DatabaseKine
+    external?: ExternalDatabaseKine
+
+schema DatabaseKine:
+    enabled?: bool
+    dataSource?: str
+    identityProvider?: str
+    keyFile?: str
+    certFile?: str
+    caFile?: str
+    extraArgs?: [str]
+
+schema ExternalDatabaseKine:
+    enabled?: bool
+    dataSource?: str
+    identityProvider?: str
+    keyFile?: str
+    certFile?: str
+    caFile?: str
+    extraArgs?: [str]
+    connector?: str
+
+schema CoreDNS:
+    enabled?: bool
+    embedded?: bool
+    security?: ControlPlaneSecurity
+    service?: CoreDNSService
+    deployment?: CoreDNSDeployment
+    overwriteConfig?: str
+    overwriteManifests?: str
+    priorityClassName?: str
+
+schema CoreDNSService:
+    spec?: {str:any}
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema CoreDNSDeployment:
+    image?: str
+    replicas?: int
+    nodeSelector?: {str:str}
+    affinity?: {str:any}
+    tolerations?: [any]
+    resources?: Resources
+    pods?: LabelsAndAnnotations
+    annotations?: {str:str}
+    labels?: {str:str}
+    topologySpreadConstraints?: [any]
+
+schema ControlPlaneProxy:
+    bindAddress?: str
+    port?: int
+    extraSANs?: [str]
+
+schema HostPathMapper:
+    enabled?: bool
+    central?: bool
+
+schema ControlPlaneIngress:
+    enabled?: bool
+    host?: str
+    pathType?: str
+    spec?: {str:any}
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema ControlPlaneService:
+    enabled?: bool
+    spec?: {str:any}
+    kubeletNodePort?: int
+    httpsNodePort?: int
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema ControlPlaneStatefulSet:
+    highAvailability?: ControlPlaneHighAvailability
+    resources?: Resources
+    scheduling?: ControlPlaneScheduling
+    security?: ControlPlaneSecurity
+    probes?: ControlPlaneProbes
+    persistence?: ControlPlanePersistence
+    enableServiceLinks?: bool
+    annotations?: {str:str}
+    labels?: {str:str}
+    pods?: LabelsAndAnnotations
+    image?: Image
+    imagePullPolicy?: str
+    workingDir?: str
+    command?: [str]
+    args?: [str]
+    env?: [any]
+    dnsPolicy?: str
+    dnsConfig?: PodDNSConfig
+    initContainers?: [any]
+    sidecarContainers?: [any]
+
+schema ControlPlaneHighAvailability:
+    replicas?: int
+    leaseDuration?: int
+    renewDeadline?: int
+    retryPeriod?: int
+
+schema ControlPlaneScheduling:
+    nodeSelector?: {str:any}
+    affinity?: {str:any}
+    tolerations?: [any]
+    priorityClassName?: str
+    podManagementPolicy?: str
+    topologySpreadConstraints?: [any]
+
+schema ControlPlaneSecurity:
+    podSecurityContext?: {str:any}
+    containerSecurityContext?: {str:any}
+
+schema ControlPlaneProbes:
+    livenessProbe?: LivenessProbe
+    readinessProbe?: ReadinessProbe
+    startupProbe?: StartupProbe
+
+schema LivenessProbe:
+    enabled?: bool
+    failureThreshold?: int
+    initialDelaySeconds?: int
+    timeoutSeconds?: int
+    periodSeconds?: int
+
+schema ReadinessProbe:
+    enabled?: bool
+    failureThreshold?: int
+    timeoutSeconds?: int
+    periodSeconds?: int
+
+schema StartupProbe:
+    enabled?: bool
+    failureThreshold?: int
+    timeoutSeconds?: int
+    periodSeconds?: int
+
+schema ControlPlanePersistence:
+    volumeClaim?: VolumeClaim
+    volumeClaimTemplates?: [any]
+    dataVolume?: [any]
+    binariesVolume?: [any]
+    addVolumes?: [any]
+    addVolumeMounts?: [VolumeMount]
+
+schema VolumeClaim:
+    # "auto", true, or false
+    enabled?: str | bool
+    accessModes?: [str]
+    retentionPolicy?: str
+    size?: str
+    storageClass?: str
+
+schema VolumeMount:
+    name: str
+    readOnly?: bool
+    mountPath: str
+    subPath?: str
+    mountPropagation?: str
+    subPathExpr?: str
+
+schema ControlPlaneAdvanced:
+    defaultImageRegistry?: str
+    virtualScheduler?: EnableSwitch
+    serviceAccount?: ControlPlaneServiceAccount
+    workloadServiceAccount?: ControlPlaneWorkloadServiceAccount
+    headlessService?: ControlPlaneHeadlessService
+    konnectivity?: Konnectivity
+    registry?: Registry
+    cloudControllerManager?: CloudControllerManager
+    globalMetadata?: ControlPlaneGlobalMetadata
+    kubeVip?: KubeVip
+    podDisruptionBudget?: PodDisruptionBudget
+
+schema Konnectivity:
+    server?: KonnectivityServer
+    agent?: KonnectivityAgent
+
+schema KonnectivityServer:
+    enabled?: bool
+    extraArgs?: [str]
+
+schema KonnectivityAgent:
+    enabled?: bool
+    replicas?: int
+    image?: str
+    imagePullPolicy?: str
+    nodeSelector?: {str:str}
+    priorityClassName?: str
+    tolerations?: [any]
+    extraEnv?: [any]
+    extraArgs?: [str]
+
+schema Registry:
+    enabled?: bool
+    anonymousPull?: bool
+    config?: any
+
+schema CloudControllerManager:
+    enabled?: bool
+
+schema ControlPlaneGlobalMetadata:
+    annotations?: {str:str}
+
+schema KubeVip:
+    enabled?: bool
+    interface?: str
+    gateway?: str
+
+schema PodDisruptionBudget:
+    enabled?: bool
+    minAvailable?: any
+    maxUnavailable?: any
+    unhealthyPodEvictionPolicy?: str
+
+schema ControlPlaneServiceAccount:
+    enabled?: bool
+    name?: str
+    imagePullSecrets?: [ImagePullSecretName]
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema ControlPlaneWorkloadServiceAccount:
+    enabled?: bool
+    name?: str
+    imagePullSecrets?: [ImagePullSecretName]
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema ControlPlaneHeadlessService:
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema ServiceMonitor:
+    enabled?: bool
+    labels?: {str:str}
+    annotations?: {str:str}
+
+# Private Nodes
+schema PrivateNodes:
+    enabled?: bool
+    kubelet?: Kubelet
+    autoUpgrade?: AutoUpgrade
+    joinNode?: JoinConfiguration
+    autoNodes?: [PrivateNodesAutoNodes]
+    vpn?: PrivateNodesVPN
+
+schema Kubelet:
+    config?: {str:any}
+
+schema AutoUpgrade:
+    enabled?: bool
+    image?: str
+    imagePullPolicy?: str
+    nodeSelector?: {str:str}
+    binariesPath?: str
+    cniBinariesPath?: str
+    concurrency?: int
+
+schema JoinConfiguration:
+    preInstallCommands?: [str]
+    preJoinCommands?: [str]
+    postJoinCommands?: [str]
+    containerd?: ContainerdJoin
+    caCertPath?: str
+    skipPhases?: [str]
+    nodeRegistration?: NodeRegistration
+
+schema ContainerdJoin:
+    enabled?: bool
+    registry?: ContainerdRegistry
+    pauseImage?: str
+
+schema ContainerdRegistry:
+    configPath?: str
+    mirrors?: {str:ContainerdMirror}
+    auth?: {str:ContainerdRegistryAuth}
+
+schema ContainerdMirror:
+    server?: str
+    caCert?: [str]
+    skipVerify?: bool
+    capabilities?: [str]
+    overridePath?: bool
+    hosts?: [ContainerdMirrorHost]
+
+schema ContainerdMirrorHost:
+    server?: str
+    caCert?: [str]
+    skipVerify?: bool
+    capabilities?: [str]
+    overridePath?: bool
+
+schema ContainerdRegistryAuth:
+    username?: str
+    password?: str
+    identityToken?: str
+    auth?: str
+
+schema NodeRegistration:
+    criSocket?: str
+    kubeletExtraArgs?: [KubeletExtraArg]
+    taints?: [KubeletJoinTaint]
+    ignorePreflightErrors?: [str]
+    imagePullPolicy?: str
+
+schema KubeletExtraArg:
+    name: str
+    value: str
+
+schema KubeletJoinTaint:
+    key: str
+    value?: str
+    effect: str
+
+schema PrivateNodesAutoNodes:
+    provider: str
+    properties?: {str:str}
+    static?: [StaticNodePool]
+    dynamic?: [DynamicNodePool]
+
+schema StaticNodePool:
+    name: str
+    nodeTypeSelector?: [Requirement]
+    taints?: [KubeletJoinTaint]
+    nodeLabels?: {str:str}
+    terminationGracePeriod?: str
+    quantity: int
+
+schema DynamicNodePool:
+    name: str
+    nodeTypeSelector?: [Requirement]
+    taints?: [KubeletJoinTaint]
+    nodeLabels?: {str:str}
+    limits?: {str:str}
+    disruption?: DynamicNodePoolDisruption
+    terminationGracePeriod?: str
+    expireAfter?: str
+    weight?: int
+
+schema DynamicNodePoolDisruption:
+    consolidateAfter?: str
+    consolidationPolicy?: str
+    budgets?: [DynamicNodePoolDisruptionBudget]
+
+schema DynamicNodePoolDisruptionBudget:
+    nodes?: str
+    schedule?: str
+    duration?: str
+
+schema Requirement:
+    property: str
+    operator?: str
+    values?: [str]
+    value?: str
+
+schema PrivateNodesVPN:
+    enabled?: bool
+    nodeToNode?: PrivateNodesVPNNodeToNode
+
+schema PrivateNodesVPNNodeToNode:
+    enabled?: bool
+
+# RBAC
+schema RBAC:
+    role?: RBACRole
+    clusterRole?: RBACClusterRole
+    enableVolumeSnapshotRules?: EnableAutoSwitch
+
+schema RBACRole:
+    enabled?: bool
+    extraRules?: [any]
+    overwriteRules?: [any]
+
+schema RBACClusterRole:
+    # "auto", true, or false
+    enabled?: str | bool
+    extraRules?: [any]
+    overwriteRules?: [any]
+
+# Plugins
+schema Plugin:
+    name?: str
+    image?: str
+    imagePullPolicy?: str
+    config?: {str:any}
+    rbac?: PluginsRBAC
+    command?: [str]
+    args?: [str]
+    securityContext?: {str:any}
+    resources?: {str:any}
+    volumeMounts?: [any]
+    version?: str
+    env?: [any]
+    envFrom?: [any]
+    lifecycle?: {str:any}
+    livenessProbe?: {str:any}
+    readinessProbe?: {str:any}
+    startupProbe?: {str:any}
+    workingDir?: str
+    optional?: bool
+
+schema Plugins:
+    name?: str
+    image?: str
+    imagePullPolicy?: str
+    config?: {str:any}
+    rbac?: PluginsRBAC
+    command?: [str]
+    args?: [str]
+    securityContext?: {str:any}
+    resources?: {str:any}
+    volumeMounts?: [any]
+
+schema PluginsRBAC:
+    role?: PluginsExtraRules
+    clusterRole?: PluginsExtraRules
+
+schema PluginsExtraRules:
+    extraRules?: [RBACPolicyRule]
+
+schema RBACPolicyRule:
+    verbs: [str]
+    apiGroups?: [str]
+    resources?: [str]
+    resourceNames?: [str]
+    nonResourceURLs?: [str]
+
+# Experimental
+schema Experimental:
+    deploy?: ExperimentalDeploy
+    syncSettings?: ExperimentalSyncSettings
+    virtualClusterKubeConfig?: VirtualClusterKubeConfig
+    denyProxyRequests?: [DenyRule]
+
+schema ExperimentalDeploy:
+    host?: ExperimentalDeployHost
+    vcluster?: ExperimentalDeployVCluster
+
+schema ExperimentalDeployHost:
+    manifests?: str
+    manifestsTemplate?: str
+
+schema ExperimentalDeployVCluster:
+    manifests?: str
+    manifestsTemplate?: str
+    helm?: [ExperimentalDeployHelm]
+
+schema ExperimentalDeployHelm:
+    chart?: ExperimentalDeployHelmChart
+    release?: ExperimentalDeployHelmRelease
+    values?: str
+    timeout?: str
+    bundle?: str
+
+schema ExperimentalDeployHelmChart:
+    name?: str
+    repo?: str
+    insecure?: bool
+    version?: str
+    username?: str
+    password?: str
+
+schema ExperimentalDeployHelmRelease:
+    name?: str
+    namespace?: str
+
+schema ExperimentalSyncSettings:
+    setOwner?: bool
+    hostMetricsBindAddress?: str
+    virtualMetricsBindAddress?: str
+
+schema VirtualClusterKubeConfig:
+    kubeConfig?: str
+    serverCAKey?: str
+    serverCACert?: str
+    clientCACert?: str
+    requestHeaderCACert?: str
+
+schema DenyRule:
+    name?: str
+    namespaces?: [str]
+    rules?: [RuleWithVerbs]
+    excludedUsers?: [str]
+
+schema RuleWithVerbs:
+    apiGroups?: [str]
+    apiVersions?: [str]
+    resources?: [str]
+    scope?: str
+    operations?: [str]
+
+# External Config
+schema ExternalConfig:
+    [str]: any
+
+# Telemetry
+schema Telemetry:
+    enabled?: bool
+    instanceCreator?: str
+    machineID?: str
+    platformUserID?: str
+    platformInstanceID?: str
+
+# Sleep Mode
+schema SleepMode:
+    enabled?: bool
+    timeZone?: str
+    autoSleep?: SleepModeAutoSleep
+    autoWakeup?: AutoWakeup
+
+schema SleepModeAutoSleep:
+    afterInactivity?: str
+    schedule?: str
+    exclude?: AutoSleepExclusion
+
+schema AutoWakeup:
+    schedule?: str
+
+schema AutoSleepExclusion:
+    selector?: LabelSelector
+
+# Logging
+schema Logging:
+    encoding?: str
+
+# Common Schemas
+schema Image:
+    registry?: str
+    repository?: str
+    tag?: str
+
+schema ImagePullSecretName:
+    name?: str
+
+schema Resources:
+    limits?: {str:any}
+    requests?: {str:any}
+
+schema LabelsAndAnnotations:
+    annotations?: {str:str}
+    labels?: {str:str}
+
+schema PodDNSConfig:
+    nameservers?: [str]
+    searches?: [str]
+    options?: [PodDNSConfigOption]
+
+schema PodDNSConfigOption:
+    name?: str
+    value?: str
+

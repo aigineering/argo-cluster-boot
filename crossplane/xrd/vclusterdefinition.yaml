@@ -124,27 +124,27 @@ spec:
                       default:
                         type: "LoadBalancer"
                         annotations: {}
-                    argocd:
-                      type: object
-                      description: "ArgoCD integration configuration"
-                      properties:
-                        enabled:
-                          type: boolean
-                          description: "Whether to create ArgoCD cluster secret"
-                          default: true
-                        project:
-                          type: string
-                          description: "ArgoCD project for this cluster"
-                          default: "default"
-                        labels:
-                          type: object
-                          description: "Labels to apply to the ArgoCD cluster secret"
-                          additionalProperties:
-                            type: string
-                      default:
-                        enabled: true
-                        project: "default"
-                        labels: {}
+                    # argocd:
+                    #   type: object
+                    #   description: "ArgoCD integration configuration"
+                    #   properties:
+                    #     enabled:
+                    #       type: boolean
+                    #       description: "Whether to create ArgoCD cluster secret"
+                    #       default: true
+                    #     project:
+                    #       type: string
+                    #       description: "ArgoCD project for this cluster"
+                    #       default: "default"
+                    #     labels:
+                    #       type: object
+                    #       description: "Labels to apply to the ArgoCD cluster secret"
+                    #       additionalProperties:
+                    #         type: string
+                    #   default:
+                    #     enabled: true
+                    #     project: "default"
+                    #     labels: {}
 
             status:
               type: object
