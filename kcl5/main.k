@@ -39,7 +39,7 @@ _app = v1alpha1.Application {
         # 
         destination: {
             server: "https://kubernetes.default.svc"
-            namespace: "vcluster"
+            namespace: _spec.namespace
         }
         syncPolicy: {
             automated: {
