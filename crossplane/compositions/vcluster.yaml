@@ -8,7 +8,7 @@ metadata:
 spec:
   writeConnectionSecretsToNamespace: crossplane-system
   compositeTypeRef:
-    apiVersion: infra.pro-techt.io/v1alpha1
+    apiVersion: infra2.pro-techt.io/v1alpha1
     kind: VCluster
 
   mode: Pipeline
