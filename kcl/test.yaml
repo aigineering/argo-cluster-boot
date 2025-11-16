@@ -1,0 +1,36 @@
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: test-vcluster1-app
+  namespace: argocd
+spec:
+  deletionPolicy: Delete
+  forProvider:
+    manifest:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: vcluster-test-vcluster1
+        namespace: argocd
+      spec:
+        destination:
+          namespace: vcluster
+          server: https://kubernetes.default.svc
+        project: default
+        source:
+          chart: vcluster
+          helm:
+            values: |
+              exportKubeConfig:
+                secret:
+                  name: test-secret-1
+                  namespace: some-namespace
+          repoURL: https://charts.loft.sh
+          targetRevision: '0.30.0'
+        syncPolicy:
+          automated:
+            prune: false
+            selfHeal: true
+  managementPolicies:
+    - '*'
+  watch: false

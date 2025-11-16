@@ -1,0 +1,97 @@
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: applications-discovery:infra.pro-techt.io/VCluster:argocd/test-vcluster1
+    kubectl.kubernetes.io/last-applied-configuration: >
+      {"apiVersion":"infra.pro-techt.io/v1alpha1","kind":"VCluster","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"applications-discovery:infra.pro-techt.io/VCluster:argocd/test-vcluster1"},"name":"test-vcluster1","namespace":"argocd"},"spec":{"parameters":{"clusterName":"test-cluster-1","exportConfig":{"name":"test-secret-1","namespace":"some-namespace"}}}}
+  creationTimestamp: "2025-11-16T00:49:45Z"
+  finalizers:
+    - composite.apiextensions.crossplane.io
+  generation: 4
+  labels:
+    crossplane.io/composite: test-vcluster1
+  name: test-vcluster1
+  namespace: argocd
+  resourceVersion: "9215"
+  uid: c4b9224a-2efe-4cdc-9e09-9e5bdb7d1171
+spec:
+  crossplane:
+    compositionRef:
+      name: vcluster-with-argocd
+    compositionRevisionRef:
+      name: vcluster-with-argocd-d0ff6dc
+    compositionUpdatePolicy: Automatic
+    resourceRefs:
+      - apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        name: test-vcluster1-app
+      - apiVersion: v1
+        kind: ConfigMap
+        name: test-vcluster1-configmap
+  parameters:
+    clusterName: test-cluster-1
+    exportConfig:
+      name: test-secret-1
+      namespace: some-namespace
+    expose:
+      annotations: {}
+      type: LoadBalancer
+    kubernetes:
+      version: "1.33"
+    namespace: vcluster
+    resources:
+      controlPlane:
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+        requests:
+          cpu: 200m
+          memory: 256Mi
+      syncer:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+    vclusterHelmVersion: 0.30.0
+status:
+  conditions:
+    - lastTransitionTime: "2025-11-16T00:49:49Z"
+      message: >-
+        cannot compose resources: cannot apply composed resource
+        "test-vcluster1-app": failed to create typed patch object
+        (argocd/test-vcluster1-app; kubernetes.crossplane.io/v1alpha2,
+        Kind=Object): .spec.forProvider.manifest: expected map, got
+        &{apiVersion: argoproj.io/v1alpha1
+
+        kind: Application
+
+        metadata:
+          name: vcluster-test-vcluster1
+          namespace: argocd
+        spec:
+          destination:
+            namespace: vcluster
+            server: https://kubernetes.default.svc
+          project: default
+          source:
+            chart: vcluster
+            helm:
+              values: |
+                exportKubeConfig:
+                  secret:
+                    name: test-secret-1
+                    namespace: some-namespace
+            repoURL: https://charts.loft.sh
+            targetRevision: '0.30.0'
+          syncPolicy:
+            automated:
+              prune: false
+              selfHeal: true
+        }
+      observedGeneration: 4
+      reason: ReconcileError
+      status: "False"
+      type: Synced

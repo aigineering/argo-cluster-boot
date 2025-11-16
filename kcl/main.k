@@ -4,22 +4,23 @@ import argo_cd.v1alpha1
 import models.v1alpha1.infra_pro_techt_io_v1alpha1_v_cluster as vcluster
 import vcluster_config.models.values as vc
 import crossplane_provider_kubernetes.v1alpha2 as cp_k8s
+import file
 
-oxr: vcluster.VCluster = option("params")?.oxr as vcluster.VCluster
-spec = oxr.spec.parameters
-meta = oxr.metadata
+_oxr: vcluster.VCluster = option("params")?.oxr or yaml.decode(file.read("input.example.yaml"))
+_spec = _oxr.spec.parameters
+_meta = _oxr.metadata
 
 _CC = vc.ClusterConfig {
     exportKubeConfig: {
         secret: {
-            name: spec.exportConfig.name
-            namespace: spec.exportConfig.namespace
+            name: _spec.exportConfig.name
+            namespace: _spec.exportConfig.namespace
         }
     }
 }
-app = v1alpha1.Application {
+_app = v1alpha1.Application {
     metadata: {
-        name: "vcluster-" + meta.name
+        name: "vcluster-" + _meta.name
         namespace: "argocd"
     }
     spec: {
@@ -27,7 +28,7 @@ app = v1alpha1.Application {
         source: {
             repoURL: "https://charts.loft.sh"
             chart: "vcluster"
-            targetRevision: spec.vclusterHelmVersion
+            targetRevision: _spec.vclusterHelmVersion
             helm: {
                 values: yaml.encode(_CC)
             }
@@ -46,29 +47,29 @@ app = v1alpha1.Application {
     }
 }
 
-k0 = cp_k8s.Object {
+_k0 = cp_k8s.Object {
     metadata: {
-        name: meta.name + "-app"
+        name: _meta.name + "-app"
         namespace: "argocd"
     }
     spec: {
         forProvider: {
-            manifest: yaml.encode(app)
+            manifest: _app
         }
     }
 }
-cm = corev1.ConfigMap {
+_cm = corev1.ConfigMap {
     metadata: {
-        name: meta.name + "-configmap"
+        name: _meta.name + "-configmap"
         namespace: "default"
     }
     data: {
-        app: yaml.encode(app)
+        app: yaml.encode(_app)
         cc: yaml.encode(_CC)
-        meta: yaml.encode(oxr.metadata)
-        spec: yaml.encode(oxr.spec)
-        ko: yaml.encode(k0)
+        meta: yaml.encode(_oxr.metadata)
+        spec: yaml.encode(_oxr.spec)
+        ko: yaml.encode(_k0)
     }
 }
 
-items = [cm, k0]
+items = [_k0]
