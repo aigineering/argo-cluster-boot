@@ -5,7 +5,6 @@ metadata:
 spec:
   parameters:
     clusterName: test-cluster-1
-    namespace: vcluster
     vclusterHelmVersion: 0.30.0
     exportConfig:
       name: test-vcluster1-connection

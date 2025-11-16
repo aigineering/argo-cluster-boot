@@ -22,7 +22,7 @@ _CC = vc.ClusterConfig {
 }
 _ns = corev1.Namespace {
     metadata: {
-        name: _spec.namespace
+        name: _meta.name
     }
 }
 _app = v1alpha1.Application {
@@ -46,7 +46,7 @@ _app = v1alpha1.Application {
         # 
         destination: {
             server: "https://kubernetes.default.svc"
-            namespace: _spec.namespace
+            namespace: _meta.name
         }
         syncPolicy: {
             automated: {
