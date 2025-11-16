@@ -67,7 +67,7 @@ _k0 = cp_k8s.Object {
 _cm = corev1.ConfigMap {
     metadata: {
         name: _meta.name + "-configmap"
-        namespace: "default"
+        namespace: "argocd"
         annotations: {
             "crossplane.io/composition-resource-name": _meta.name + "-configmap"
         }
@@ -83,7 +83,7 @@ _cm = corev1.ConfigMap {
 _k1 = cp_k8s.Object {
     metadata: {
         name: _meta.name + "-configmap-object"
-        namespace: "default"
+        namespace: "argocd"
         annotations: {
             "crossplane.io/composition-resource-name": _meta.name + "-configmap-object"
         }
