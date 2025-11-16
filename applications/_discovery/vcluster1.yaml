@@ -8,5 +8,5 @@ spec:
     namespace: vcluster
     vclusterHelmVersion: 0.30.0
     exportConfig:
-      name: test-secret-1
-      namespace: some-namespace
+      name: test-vcluster3-connection
+      namespace: crossplane-system
