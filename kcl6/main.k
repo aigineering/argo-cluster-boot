@@ -12,10 +12,12 @@ _meta = _oxr.metadata
 
 _CC = vc.ClusterConfig {
     exportKubeConfig: {
-        secret: {
-            name: _spec.exportConfig.name
-            namespace: _spec.exportConfig.namespace
-        }
+        additionalSecrets: [
+            {
+                name: _spec.exportConfig.name
+                namespace: _spec.exportConfig.namespace
+            }
+        ]
     }
 }
 _app = v1alpha1.Application {
