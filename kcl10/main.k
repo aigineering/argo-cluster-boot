@@ -79,9 +79,9 @@ _cm = corev1.ConfigMap {
 
 _kns = cp_k8s.Object {
     metadata: {
-        name: _spec.namespace + "-namespace-object"
+        name: _spec.clusterName + "-namespace-object"
         annotations: {
-            "crossplane.io/composition-resource-name": _spec.namespace + "-namespace-object"
+            "crossplane.io/composition-resource-name": _spec.clusterName + "-namespace-object"
         }
     }
     spec: {
