@@ -18,50 +18,10 @@ spec:
         name: crossplane-contrib-function-kcl
       input:
         apiVersion: krm.kcl.dev/v1alpha1
-        kind: KCLRun
-        metadata:
-          name: basic
+        kind: KCLInput
         spec:
-          dependencies:
-            - '{ git = "https://github.com/SimSimY/kcl-vcluster-config", commit = "3af8de0", version = "0.30.0" }'
-            - 'argo-cd = "3.1.8"'
-            - 'crossplane-provider-kubernetes = "0.18.0"'
-          target: Resources
+          source: github.com/aigineering/argo-cluster-boot/kcl
 
-          source: |
-            import argo_cd.v1alpha1
-            import crossplane_provider_kubernetes.v1alpha2
-            import yaml
-            import vcluster_config.models.values as vc
-            import models.v1alpha1.infra_pro_techt_io_v1alpha1_v_cluster as vcluster
-
-            # oxr = option("params").oxr
-            application = v1alpha1.Application {
-                metadata: {
-                    name: "vcluster-" + _config.metadata.name
-                    namespace: "argocd"
-                }
-                spec: {
-                    project: "default"
-                    source: {
-                        repoURL: "https://charts.loft.sh"
-                        chart: "vcluster"
-                        targetRevision: _spec.vclusterHelmVersion
-                        
-                    }
-                    destination: {
-                        server: "https://kubernetes.default.svc"
-                        namespace: "vcluster"
-                    }
-                    syncPolicy: {
-                        automated: {
-                            prune: False
-                            selfHeal: True
-                        }
-                    }
-                }
-            }
-            items = [application]
     - step: automatically-detect-ready-composed-resources
       functionRef:
         name: function-auto-ready
