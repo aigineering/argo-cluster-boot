@@ -20,6 +20,11 @@ _CC = vc.ClusterConfig {
         ]
     }
 }
+_ns = corev1.Namespace {
+    metadata: {
+        name: _spec.namespace
+    }
+}
 _app = v1alpha1.Application {
     metadata: {
         name: "vcluster-" + _meta.name
@@ -69,6 +74,22 @@ _cm = corev1.ConfigMap {
     }
 }
 
+_kns = cp_k8s.Object {
+    metadata: {
+        name: _spec.namespace + "-namespace-object"
+        annotations: {
+            "crossplane.io/composition-resource-name": _spec.namespace + "-namespace-object"
+        }
+    }
+    spec: {
+        providerConfigRef: {
+            name: "k8s-local"
+        }
+        forProvider: {
+            manifest: _ns
+        }
+    }
+}
 _k0 = cp_k8s.Object {
     metadata: {
         name: _meta.name + "-app-object"
@@ -103,4 +124,4 @@ _k1 = cp_k8s.Object {
     }
 }
 
-items = [_k0, _k1]
+items = [_kns, _k0, _k1]
