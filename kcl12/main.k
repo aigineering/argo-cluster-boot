@@ -59,6 +59,27 @@ _app = v1alpha1.Application {
         }
     }
 }
+_app2 = {
+    apiVersion = "helm.crossplane.io/v1beta1"
+    kind = "Release"
+    metadata = {
+        name = _meta.name + "-vcluster"
+    }
+    spec = {
+        forProvider = {
+            chart = {
+                name = "vcluster"
+                repository = "https://charts.loft.sh"
+                version = "15.2.5"
+            }
+            namespace = _spec.clusterName
+            values = _CC
+        }
+        providerConfigRef = {
+            name = "helm-provider"
+        }
+    }
+}
 
 _cm = corev1.ConfigMap {
     metadata: {
@@ -127,4 +148,4 @@ _k1 = cp_k8s.Object {
     }
 }
 
-items = [_kns, _k0, _k1]
+items = [_kns, _app2, _cm]

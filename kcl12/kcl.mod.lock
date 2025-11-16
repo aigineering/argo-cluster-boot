@@ -7,6 +7,14 @@
     reg = "ghcr.io"
     repo = "kcl-lang/argo-cd"
     oci_tag = "3.1.8"
+  [dependencies.crossplane-provider-helm]
+    name = "crossplane-provider-helm"
+    full_name = "crossplane-provider-helm_0.13.2"
+    version = "0.13.2"
+    sum = "GMQRiogg5A19N/waqjcCsTG5aZxI8mOfenGCpgtSeTM="
+    reg = "ghcr.io"
+    repo = "kcl-lang/crossplane-provider-helm"
+    oci_tag = "0.13.2"
   [dependencies.crossplane-provider-kubernetes]
     name = "crossplane-provider-kubernetes"
     full_name = "crossplane-provider-kubernetes_0.18.0"
