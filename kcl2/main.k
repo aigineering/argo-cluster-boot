@@ -50,19 +50,6 @@ _app = v1alpha1.Application {
     }
 }
 
-_k0 = cp_k8s.Object {
-    metadata: {
-        name: _meta.name + "-app-object"
-        annotations: {
-            "crossplane.io/composition-resource-name": _meta.name + "-app-object"
-        }
-    }
-    spec: {
-        forProvider: {
-            manifest: _app
-        }
-    }
-}
 _cm = corev1.ConfigMap {
     metadata: {
         name: _meta.name + "-configmap"
@@ -79,6 +66,15 @@ _cm = corev1.ConfigMap {
         ko: yaml.encode(_k0)
     }
 }
+
+_k0 = cp_k8s.Object {
+    spec: {
+        forProvider: {
+            manifest: _app
+        }
+    }
+}
+
 _k1 = cp_k8s.Object {
     metadata: {
         name: _meta.name + "-configmap-object"
