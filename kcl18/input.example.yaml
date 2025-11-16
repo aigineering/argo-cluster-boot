@@ -1,0 +1,86 @@
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: applications-discovery:infra.pro-techt.io/VCluster:argocd/test-vcluster3
+    kubectl.kubernetes.io/last-applied-configuration: >
+      {"apiVersion":"infra.pro-techt.io/v1alpha1","kind":"VCluster","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"applications-discovery:infra.pro-techt.io/VCluster:argocd/test-vcluster3"},"name":"test-vcluster3"},"spec":{"parameters":{"clusterName":"test-cluster-3","exportConfig":{"name":"test-vcluster2-connection","namespace":"crossplane-system"},"vclusterHelmVersion":"0.30.0"}}}
+  creationTimestamp: "2025-11-16T03:51:08Z"
+  finalizers:
+    - composite.apiextensions.crossplane.io
+  generation: 4
+  labels:
+    crossplane.io/composite: test-vcluster3
+  name: test-vcluster3
+  resourceVersion: "25066"
+  uid: 48d22349-815e-4f14-ade8-9e65766cb705
+spec:
+  crossplane:
+    compositionRef:
+      name: vcluster-with-argocd
+    compositionRevisionRef:
+      name: vcluster-with-argocd-061ed0b
+    compositionUpdatePolicy: Automatic
+    resourceRefs:
+      - apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        name: test-vcluster3-vcluster
+        namespace: argocd
+      - apiVersion: v1
+        kind: ConfigMap
+        name: test-vcluster3-configmap
+        namespace: argocd
+      - apiVersion: v1
+        kind: Namespace
+        name: test-cluster-3
+  parameters:
+    clusterName: test-cluster-3
+    exportConfig:
+      name: test-vcluster2-connection
+      namespace: crossplane-system
+    expose:
+      annotations: {}
+      type: LoadBalancer
+    kubernetes:
+      version: "1.33"
+    resources:
+      controlPlane:
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+        requests:
+          cpu: 200m
+          memory: 256Mi
+      syncer:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+    vclusterHelmVersion: 0.30.0
+status:
+  conditions:
+    - lastTransitionTime: "2025-11-16T03:52:02Z"
+      message: >+
+        cannot compose resources: pipeline step "render-vcluster-resources"
+        returned a fatal result: failed to run kcl function pipelines:
+        EvaluationError
+           --> /tmp/kcl-sandbox1344847807/git/models/v1alpha1/infra_pro_techt_io_v1alpha1_v_cluster.k:135:1
+            |
+        135 |     name?: str
+            |  expect [models.v1alpha1.infra_pro_techt_io_v1alpha1_v_cluster.InfraProTechtIoV1alpha1VClusterSpecCrossplaneResourceRefsItems0], got list
+            |
+
+      observedGeneration: 4
+      reason: ReconcileError
+      status: "False"
+      type: Synced
+    - lastTransitionTime: "2025-11-16T03:51:09Z"
+      message: >-
+        Unready resources: test-cluster-3, test-vcluster3-configmap, and
+        test-vcluster3-vcluster
+      observedGeneration: 4
+      reason: Creating
+      status: "False"
+      type: Ready

@@ -129,10 +129,9 @@ schema InfraProTechtIoV1alpha1VClusterSpecCrossplaneResourceRefsItems0:
         name
     """
     apiVersion: str
-
     kind: str
-
     name?: str
+    namespace?: str
 
 schema InfraProTechtIoV1alpha1VClusterSpecParameters:
     r"""

@@ -15,7 +15,7 @@ _CC = vc.ClusterConfig {
         additionalSecrets: [
             {
                 name: _spec.exportConfig.name
-                namespace: _spec.exportConfig.namespace
+                namespace: _spec.clusterName
             }
         ]
     }
@@ -42,11 +42,8 @@ _app = v1alpha1.Application {
             repoURL: "https://charts.loft.sh"
             chart: "vcluster"
             targetRevision: _spec.vclusterHelmVersion
-            helm: {}
+            helm: {values: yaml.encode(_CC)}
         }
-        # values: yaml.encode(_CC)
-        
-        # 
         destination: {
             server: "https://kubernetes.default.svc"
             namespace: _spec.clusterName
