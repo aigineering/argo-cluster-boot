@@ -10,6 +10,9 @@ spec:
   names:
     kind: VCluster
     plural: vclusters
+  claimNames:
+    kind: VClusterClaim
+    plural: vclusterclaims
   versions:
     - name: v1alpha1
       served: true
