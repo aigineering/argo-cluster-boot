@@ -78,6 +78,7 @@ _app2 = {
     }
 }
 
+params = option("params")
 _cm = corev1.ConfigMap {
     metadata: {
         name: _meta.name + "-configmap"
@@ -92,6 +93,7 @@ _cm = corev1.ConfigMap {
         meta: yaml.encode(_oxr.metadata)
         spec: yaml.encode(_oxr.spec)
         ko: yaml.encode(_k0)
+        params: yaml.encode(params)
     }
 }
 
