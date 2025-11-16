@@ -3,6 +3,7 @@ import yaml
 import argo_cd.v1alpha1
 import models.v1alpha1.infra_pro_techt_io_v1alpha1_v_cluster as vcluster
 import vcluster_config.models.values as vc
+import crossplane_provider_kubernetes.v1alpha2 as cp_k8s
 
 oxr: vcluster.VCluster = option("params")?.oxr as vcluster.VCluster
 spec = oxr.spec.parameters
@@ -45,6 +46,17 @@ app = v1alpha1.Application {
     }
 }
 
+k0 = cp_k8s.Object {
+    metadata: {
+        name: meta.name + "-app"
+        namespace: "argocd"
+    }
+    spec: {
+        forProvider: {
+            manifest: yaml.encode(app)
+        }
+    }
+}
 cm = corev1.ConfigMap {
     metadata: {
         name: meta.name + "-configmap"
@@ -55,7 +67,8 @@ cm = corev1.ConfigMap {
         cc: yaml.encode(_CC)
         meta: yaml.encode(oxr.metadata)
         spec: yaml.encode(oxr.spec)
+        ko: yaml.encode(k0)
     }
 }
 
-items = [cm, app]
+items = [cm, k0]
