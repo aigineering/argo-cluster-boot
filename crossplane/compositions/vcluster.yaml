@@ -20,7 +20,7 @@ spec:
         apiVersion: krm.kcl.dev/v1alpha1
         kind: KCLInput
         spec:
-          source: github.com/aigineering/argo-cluster-boot/kcl
+          source: github.com/aigineering/argo-cluster-boot/kcl1
 
     - step: automatically-detect-ready-composed-resources
       functionRef:
