@@ -22,6 +22,9 @@ _app = v1alpha1.Application {
     metadata: {
         name: "vcluster-" + _meta.name
         namespace: "argocd"
+        annotations: {
+            "crossplane.io/composition-resource-name": _meta.name + "-app"
+        }
     }
     spec: {
         project: "default"
@@ -51,6 +54,9 @@ _k0 = cp_k8s.Object {
     metadata: {
         name: _meta.name + "-app"
         namespace: "argocd"
+        annotations: {
+            "crossplane.io/composition-resource-name": _meta.name + "-app-object"
+        }
     }
     spec: {
         forProvider: {
