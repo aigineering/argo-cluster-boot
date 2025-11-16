@@ -61,7 +61,7 @@ spec:
                     }
                 }
             }
-            v1alpha1.Application {
+            application = v1alpha1.Application {
                 metadata: {
                     name: "vcluster-" + _config.metadata.name
                     namespace: "argocd"
@@ -88,6 +88,7 @@ spec:
                     }
                 }
             }
+            items = [application]
     - step: automatically-detect-ready-composed-resources
       functionRef:
         name: function-auto-ready
