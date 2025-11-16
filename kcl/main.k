@@ -68,6 +68,9 @@ _cm = corev1.ConfigMap {
     metadata: {
         name: _meta.name + "-configmap"
         namespace: "default"
+        annotations: {
+            "crossplane.io/composition-resource-name": _meta.name + "-configmap"
+        }
     }
     data: {
         app: yaml.encode(_app)
