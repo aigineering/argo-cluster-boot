@@ -133,9 +133,9 @@ _k0 = cp_k8s.Object {
 
 _k1 = cp_k8s.Object {
     metadata: {
-        name: _meta.name + "-configmap-object"
+        name: _spec.clusterName + "-configmap-object"
         annotations: {
-            "crossplane.io/composition-resource-name": _meta.name + "-configmap-object"
+            "crossplane.io/composition-resource-name": _spec.clusterName + "-configmap-object"
         }
     }
     spec: {
