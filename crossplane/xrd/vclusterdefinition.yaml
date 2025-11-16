@@ -2,7 +2,7 @@
 apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
-  name: vclusters2.infra.pro-techt.io
+  name: vclusters.infra2.pro-techt.io
   annotations:
     argocd.argoproj.io/sync-wave: "-37"
 spec:
