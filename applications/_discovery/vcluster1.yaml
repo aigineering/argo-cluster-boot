@@ -1,4 +1,4 @@
-apiVersion: infra2.pro-techt.io/v1alpha1
+apiVersion: infra.pro-techt.io/v1alpha1
 kind: VCluster
 metadata:
   name: test-vcluster2
