@@ -68,6 +68,12 @@ _cm = corev1.ConfigMap {
 }
 
 _k0 = cp_k8s.Object {
+    metadata: {
+        name: _meta.name + "-app-object"
+        annotations: {
+            "crossplane.io/composition-resource-name": _meta.name + "-app-object"
+        }
+    }
     spec: {
         forProvider: {
             manifest: _app
