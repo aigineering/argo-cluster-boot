@@ -30,10 +30,6 @@ spec:
                     clusterName:
                       type: string
                       description: "Name of the vcluster"
-                    namespace:
-                      type: string
-                      description: "Namespace where the vcluster will be deployed"
-                      default: "vcluster"
                     vclusterHelmVersion:
                       type: string
                       description: "Version of vcluster to deploy"
