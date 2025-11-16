@@ -22,12 +22,12 @@ _CC = vc.ClusterConfig {
 }
 _ns = corev1.Namespace {
     metadata: {
-        name: _meta.name
+        name: _spec.clusterName
     }
 }
 _app = v1alpha1.Application {
     metadata: {
-        name: "vcluster-" + _meta.name
+        name: _meta.name + "-vcluster"
         namespace: "argocd"
         annotations: {
             "crossplane.io/composition-resource-name": _meta.name + "-app"
@@ -39,14 +39,14 @@ _app = v1alpha1.Application {
             repoURL: "https://charts.loft.sh"
             chart: "vcluster"
             targetRevision: _spec.vclusterHelmVersion
-            helm: {
-                values: yaml.encode(_CC)
-            }
+            helm: {}
         }
+        # values: yaml.encode(_CC)
+        
         # 
         destination: {
             server: "https://kubernetes.default.svc"
-            namespace: _meta.name
+            namespace: _spec.clusterName
         }
         syncPolicy: {
             automated: {
