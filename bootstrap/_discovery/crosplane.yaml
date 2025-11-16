@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/aigineering/argo-cluster-boot
     targetRevision: main
-    path: infrasctructure/crossplane/providers
+    path: crossplane/providers
   destination:
     server: https://kubernetes.default.svc
     namespace: crossplane-system
