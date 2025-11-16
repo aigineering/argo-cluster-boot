@@ -80,5 +80,19 @@ _cm = corev1.ConfigMap {
         ko: yaml.encode(_k0)
     }
 }
+_k1 = cp_k8s.Object {
+    metadata: {
+        name: _meta.name + "-configmap-object"
+        namespace: "default"
+        annotations: {
+            "crossplane.io/composition-resource-name": _meta.name + "-configmap-object"
+        }
+    }
+    spec: {
+        forProvider: {
+            manifest: _cm
+        }
+    }
+}
 
-items = [_k0]
+items = [_k0, _k1]
