@@ -23,6 +23,9 @@ _CC = vc.ClusterConfig {
 _ns = corev1.Namespace {
     metadata: {
         name: _spec.clusterName
+        annotations: {
+            "crossplane.io/composition-resource-name": _meta.name + "-ns"
+        }
     }
 }
 _app = v1alpha1.Application {
