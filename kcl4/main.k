@@ -75,6 +75,9 @@ _k0 = cp_k8s.Object {
         }
     }
     spec: {
+        providerConfigRef: {
+            name: "k8s-local"
+        }
         forProvider: {
             manifest: _app
         }
@@ -89,6 +92,9 @@ _k1 = cp_k8s.Object {
         }
     }
     spec: {
+        providerConfigRef: {
+            name: "k8s-local"
+        }
         forProvider: {
             manifest: _cm
         }
