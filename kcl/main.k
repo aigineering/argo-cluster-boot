@@ -52,7 +52,7 @@ _app = v1alpha1.Application {
 
 _k0 = cp_k8s.Object {
     metadata: {
-        name: _meta.name + "-app"
+        name: _meta.name + "-app-object"
         annotations: {
             "crossplane.io/composition-resource-name": _meta.name + "-app-object"
         }
