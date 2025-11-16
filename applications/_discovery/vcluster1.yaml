@@ -1,7 +1,7 @@
 apiVersion: infra.pro-techt.io/v1alpha1
 kind: VCluster
 metadata:
-  name: test-vcluster2
+  name: test-vcluster3
 spec:
   parameters:
     clusterName: test-cluster-1
