@@ -160,6 +160,7 @@ schema InfraProTechtIoV1alpha1VClusterSpecParameters:
     exportConfig?: InfraProTechtIoV1alpha1VClusterSpecParametersExportConfig
     expose?: InfraProTechtIoV1alpha1VClusterSpecParametersExpose
     kubernetes?: InfraProTechtIoV1alpha1VClusterSpecParametersKubernetes
+    namespace?: str = "vcluster"
     resources?: InfraProTechtIoV1alpha1VClusterSpecParametersResources
     vclusterHelmVersion?: str = "0.30.0"
 

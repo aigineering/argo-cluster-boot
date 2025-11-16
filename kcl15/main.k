@@ -70,7 +70,7 @@ _app2 = {
             chart = {
                 name = "vcluster"
                 repository = "https://charts.loft.sh"
-                version = "15.2.5"
+                version = _spec.vclusterHelmVersion
             }
             namespace = _spec.clusterName
             values = _CC
