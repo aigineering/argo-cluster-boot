@@ -148,4 +148,4 @@ _k1 = cp_k8s.Object {
     }
 }
 
-items = [_kns, _app2, _cm]
+items = [_ns, _app, _cm]
