@@ -6,13 +6,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-37"
 spec:
+  scope: Cluster
   group: infra.pro-techt.io
   names:
     kind: VCluster
     plural: vclusters
-  claimNames:
-    kind: VClusterClaim
-    plural: vclusterclaims
   versions:
     - name: v1alpha1
       served: true
