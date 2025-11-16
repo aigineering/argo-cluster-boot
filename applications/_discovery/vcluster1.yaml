@@ -9,3 +9,15 @@ spec:
     exportConfig:
       name: test-vcluster2-connection
       namespace: crossplane-system
+---
+apiVersion: infra.pro-techt.io/v1alpha1
+kind: VCluster
+metadata:
+  name: test-vcluster5
+spec:
+  parameters:
+    clusterName: test-cluster-5
+    vclusterHelmVersion: 0.30.0
+    exportConfig:
+      name: test-vcluster2-connection
+      namespace: crossplane-system
